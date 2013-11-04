@@ -1,59 +1,60 @@
 (function () {
-    this.Queue = function () {
+    this.Queue = function (refreshSize) {
 
+        refreshSize = refreshSize || 100000;
         var innerArray = [];
-        var index = 0;
+        var offset = 0;
 
         this.enqueue = function (val) {
             innerArray.push(val);
+            if (offset > refreshSize) { this.clean(); }
         };
 
         this.cheat = function (val) {
-            if (index > 0) {
-                index--;
-                innerArray[index] = val;
+            if (offset > 0) {
+                offset--;
+                innerArray[offset] = val;
             } else {
                 innerArray.splice(0, 0, val);
             }
-
+            if (offset > refreshSize) { this.clean(); }
         };
 
         this.dequeue = function () {
             var returnValue;
-            while (returnValue === undefined && index < innerArray.length) {
-                index++;
-                returnValue = innerArray[index - 1];
-                innerArray[index - 1] = undefined;
+            while (returnValue === undefined && offset < innerArray.length) {
+                offset++;
+                returnValue = innerArray[offset - 1];
+                innerArray[offset - 1] = undefined;
             }
             return returnValue;
         };
 
         this.peek = function (i) {
-            return innerArray[index + i];
+            return innerArray[offset + i];
         };
 
         this.length = function () {
-            return innerArray.length - index;
+            return innerArray.length - offset;
         };
 
         this.removeAt = function (i) {
-            innerArray[index + i] = undefined;
+            innerArray[offset + i] = undefined;
         };
 
         this.all = function (process) {
-            for (var i = index; i < innerArray.length; i++) {
-                process(innerArray[i], i - index);
+            for (var i = offset; i < innerArray.length; i++) {
+                process(innerArray[i], i - offset);
             }
-            this.clean();
         };
 
         this.clean = function () {
             var newArray = [];
-            for (var i = index; i < innerArray.length; i++) {
+            for (var i = offset; i < innerArray.length; i++) {
                 if (innerArray[i] !== undefined) { newArray.push(innerArray[i]); }
             }
             innerArray = newArray;
-            index = 0;
+            offset = 0;
         };
 
         this.sort = function (sortFunc) {
